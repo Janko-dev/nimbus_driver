@@ -39,6 +39,8 @@ void load_resources(Ctx* ctx){
     // load building textures
     ctx->obs_texs[0] = load_texture(ctx, "../img/building1.png");
     ctx->obs_texs[1] = load_texture(ctx, "../img/building2.png");
+    ctx->obs_texs[2] = load_texture(ctx, "../img/building3.png");
+    ctx->obs_texs[3] = load_texture(ctx, "../img/building4.png");
 
     // load enemy textures
     ctx->enemy_texs[0] = load_texture(ctx, "../img/enemy_frame1.png");

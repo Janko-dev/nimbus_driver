@@ -18,7 +18,7 @@
 
 #define AVR_OBS_WIDTH 128
 #define NUM_OBS WIN_WIDTH / AVR_OBS_WIDTH
-#define NUM_OBS_FRAMES 2
+#define NUM_OBS_FRAMES 4
 #define NUM_DP_FRAMES 1
 #define DP_RATE 0.4f
 

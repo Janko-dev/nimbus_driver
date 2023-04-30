@@ -170,10 +170,6 @@ void render(Ctx* ctx){
     // render player
     SDL_RenderCopyExF(ctx->ren, ctx->anim_frames[ctx->player.frame_index], NULL, &ctx->player.r, ctx->player.dy*4, NULL, SDL_FLIP_NONE);
     
-    // debug
-    // SDL_SetRenderDrawColor(ctx->ren, ctx->player.col.r, ctx->player.col.g, ctx->player.col.b, ctx->player.col.a);
-    // SDL_RenderFillRect(ctx->ren, &FRECT_TO_RECT(ctx->player.r));
-
     // render obstacles
     for (size_t i = 0; i < NUM_OBS; ++i) {
         Obstacle* ob = ctx->obs+i;
@@ -201,7 +197,7 @@ void render(Ctx* ctx){
     SDL_SetRenderDrawColor(ctx->ren, 52, 52, 52, 255);
     SDL_RenderFillRectF(ctx->ren, &(SDL_FRect){20, 20, 100, 20});
     
-    SDL_SetRenderDrawColor(ctx->ren, 200, 20, 20, 255);
+    SDL_SetRenderDrawColor(ctx->ren, 20, 200, 20, 255);
     SDL_RenderFillRectF(ctx->ren, &(SDL_FRect){20, 20, SDL_max(0, ctx->player.health), 20});
 
     SDL_RenderCopy(ctx->ren, ctx->score_tex, NULL, &(SDL_Rect){20, 50, 100, 20});
@@ -211,12 +207,23 @@ void render(Ctx* ctx){
 
 void update(Ctx* ctx, double dt){
     
+    // update background
+    for (size_t i = 0; i < PARALLAX_COUNT; ++i){
+        SDL_FRect* rect = ctx->background + i;
+        rect->x -= dt * 0.05f;
+        if (rect->x + rect->w < 0) {
+            random_w_h(&rect->w, &rect->h);
+            rect->x = WIN_WIDTH;
+            rect->y = WIN_HEIGHT - rect->h;
+        }
+    }
+
     if (ctx->is_game_over){
         if (ctx->keys[KEY_SPACE]){
             ctx->is_game_over = false;
             ctx->keys[KEY_SPACE] = 0;
-            return;
         }
+        return;
     }
 
     // player update
@@ -324,16 +331,6 @@ void update(Ctx* ctx, double dt){
         if (SDL_HasIntersection(&FRECT_TO_RECT(en->r), &FRECT_TO_RECT(ctx->player.r))) {
             // intersection hit
             ctx->player.health -= HEALTH_DEC;
-        }
-    }
-
-    for (size_t i = 0; i < PARALLAX_COUNT; ++i){
-        SDL_FRect* rect = ctx->background + i;
-        rect->x -= dt * 0.05f;
-        if (rect->x + rect->w < 0) {
-            random_w_h(&rect->w, &rect->h);
-            rect->x = WIN_WIDTH;
-            rect->y = WIN_HEIGHT - rect->h;
         }
     }
 
