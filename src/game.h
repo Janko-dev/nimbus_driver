@@ -16,12 +16,12 @@
 #define WIN_HEIGHT 480
 #define FPS 60
 
-#define NUM_OBS 10
 #define AVR_OBS_WIDTH 64
+#define NUM_OBS WIN_WIDTH / AVR_OBS_WIDTH
 
 #define PLAYER_WIDTH  64
 #define PLAYER_HEIGHT 64
-#define NUM_PLAYER_FRAMES 2
+#define NUM_PLAYER_FRAMES 4
 #define NUM_PACKAGE_FRAMES 2
 #define Y_ACC 0.05f
 #define Y_DEC 0.05f
@@ -50,6 +50,7 @@ typedef struct {
     // animation
     SDL_Texture* anim_frames[NUM_PLAYER_FRAMES];
     size_t frame_index;
+    // SDL_Texture* player_tex;
     // transform
     SDL_FRect r;
     float dy, dx;

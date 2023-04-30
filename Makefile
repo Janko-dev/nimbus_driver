@@ -14,7 +14,7 @@ endif
 SRC = ./src/
 BIN = ./bin/
 IN = $(SRC)game.c $(SRC)main.c
-BINARY_NAME = ldgame
+BINARY_NAME = nimbus_driver
 OUT = $(BIN)$(BINARY_NAME)
 
 

@@ -28,6 +28,22 @@ float rand_between(float min, float max){
     return ((float)rand() / (float)RAND_MAX) * (max - min) + min;
 }
 
+void generate_obstacle(Obstacle* ob, size_t index) {
+    ob->col = (SDL_Color){rand()%255, rand()%255, rand()%255, 255};
+        
+    float w = AVR_OBS_WIDTH; //rand_between(AVR_OBS_WIDTH - 20, AVR_OBS_WIDTH + 20);
+    float h = rand_between(20, WIN_HEIGHT/2);
+    
+    ob->has_delivery_point = rand_between(0, 1) < 0.2f;
+    // if (ob->has_delivery_point){
+    //     h = WIN_HEIGHT/2;
+    // }
+    
+    float x = index * w;
+    float y = WIN_HEIGHT - h;
+    ob->r = (SDL_FRect){x, y, w, h};
+}
+
 void init_sdl_context(Ctx* ctx, const char* title, size_t width, size_t height){
     srand(time(NULL));
 
@@ -56,15 +72,16 @@ void init_sdl_context(Ctx* ctx, const char* title, size_t width, size_t height){
 
     ctx->package_texs[0] = load_texture(ctx, "../img/box1.png");
     ctx->package_texs[1] = load_texture(ctx, "../img/box2.png");
-    // ctx->package_idx = 0;
     ctx->package_thrown = false;
 
     // initialize player
     ctx->player = (Player){
         .r = {WIN_WIDTH/2 - PLAYER_WIDTH/2, 50, PLAYER_WIDTH, PLAYER_HEIGHT},
         .anim_frames = {
-            load_texture(ctx, "../img/LD53_frame1.png"), 
-            load_texture(ctx, "../img/LD53_frame2.png")
+            load_texture(ctx, "../img/driver_frames1.png"), 
+            load_texture(ctx, "../img/driver_frames2.png"),
+            load_texture(ctx, "../img/driver_frames3.png"), 
+            load_texture(ctx, "../img/driver_frames4.png")
         },
         .frame_index = 0,
         .health = 100.f,
@@ -75,16 +92,7 @@ void init_sdl_context(Ctx* ctx, const char* title, size_t width, size_t height){
     // initialize obstacles
     for (size_t i = 0; i < NUM_OBS; ++i){
         Obstacle* ob = ctx->obs+i;
-        ob->col = (SDL_Color){rand()%255, rand()%255, rand()%255, 255};
-        
-        float w = rand_between(AVR_OBS_WIDTH - 20, AVR_OBS_WIDTH + 20);
-        float h = rand_between(20, WIN_HEIGHT/3);
-        
-        float x = i * w;
-        float y = WIN_HEIGHT - h;
-        ob->r = (SDL_FRect){x, y, w, h};
-
-        ob->has_delivery_point = rand_between(0, 1) < 0.2f;
+        generate_obstacle(ob, i);
     }
 
     ctx->is_running = true;
@@ -161,13 +169,15 @@ void render(Ctx* ctx){
 void update(Ctx* ctx, double dt){
     
     // player update
-    ctx->player.frame_index = ctx->num_frames % 10 == 0 ? 0 : 1;
+    if (ctx->num_frames % (FPS/2) == 0){
+        ctx->player.frame_index = (ctx->player.frame_index+1) % NUM_PLAYER_FRAMES;
+    }
 
     if ((ctx->keys[KEY_DOWN] || ctx->keys[KEY_UP]) && SDL_fabsf(ctx->player.dy) < 2)
         ctx->player.dy += (ctx->keys[KEY_DOWN] - ctx->keys[KEY_UP]) * Y_ACC;
     else {
-        if (ctx->player.dy > 0) ctx->player.dy -= Y_DEC;
-        else if (ctx->player.dy < 0) ctx->player.dy += Y_DEC;
+        if (ctx->player.dy > 0) ctx->player.dy = SDL_max(0, ctx->player.dy-Y_DEC);
+        else if (ctx->player.dy < 0) ctx->player.dy = SDL_min(0, ctx->player.dy+Y_DEC);
     }
 
     ctx->player.r.y += ctx->player.dy * dt * 0.1;
@@ -182,7 +192,8 @@ void update(Ctx* ctx, double dt){
                 32, 32
             },
             .angle = 0,
-            .dx = -0.03f, .dy = -0.3f,
+            // .dx = -0.03f, .dy = -0.3f,
+            .dx = -0.03f, .dy = -0.06f * ctx->player.dy - 0.1f,
         };
         ctx->package_thrown = true;
     }
@@ -203,13 +214,8 @@ void update(Ctx* ctx, double dt){
         Obstacle* ob = ctx->obs+i;
         ob->r.x -= dt * 0.1;
         if (ob->r.x + ob->r.w < 0) {
-            float w = rand_between(AVR_OBS_WIDTH - 10, AVR_OBS_WIDTH + 10);
-            float h = rand_between(10, WIN_HEIGHT/2);
-            float x = WIN_WIDTH;
-            float y = WIN_HEIGHT - h;
-
-            ob->r = (SDL_FRect){x, y, w, h};
-            ob->has_delivery_point = rand_between(0, 1) < 0.2f;
+            generate_obstacle(ob, i);
+            ob->r.x = WIN_WIDTH;
         }
 
         // player collision
@@ -244,6 +250,7 @@ void destroy(Ctx* ctx){
 
     for (size_t i = 0; i < NUM_PLAYER_FRAMES; ++i)
         SDL_DestroyTexture(ctx->player.anim_frames[i]);
+    // SDL_DestroyTexture(ctx->player.player_tex);
 
     for (size_t i = 0; i < NUM_PACKAGE_FRAMES; ++i)
         SDL_DestroyTexture(ctx->package_texs[i]);

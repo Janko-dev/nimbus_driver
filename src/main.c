@@ -3,11 +3,8 @@
 int main(int argc, char** argv) {
     (void) argc; (void) argv;
 
-    // printf("res: %d\n", SDL_HasIntersection(&(SDL_Rect){288, 362, 64, 64}, &(SDL_Rect){120, 120, 50, 50}));
-    // return 0;
-
     Ctx ctx = {0};
-    init_sdl_context(&ctx, "Ludum Dare 53 Game Jam", WIN_WIDTH, WIN_HEIGHT);
+    init_sdl_context(&ctx, "Nimbus Driver - Ludum Dare 53 Game Jam", WIN_WIDTH, WIN_HEIGHT);
     
     const Uint64 frame_delay = 1000 / FPS;
 	Uint64 frame_start;
